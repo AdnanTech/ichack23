@@ -16,3 +16,12 @@ virtual env
 <br/>
 - pip install terra-python
 - pip install configobj
+
+# Resources
+Whoop
+- alexandre.venet@hotmail.com
+- !mt17^78E6!xN@!^^1q8
+
+Oura
+- halvardrams@hotmail.com
+- Palermo2015@
