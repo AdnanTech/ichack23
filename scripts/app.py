@@ -54,5 +54,5 @@ def get_per_day():
 
 @app.route("/api/send_sms", methods=['GET'])
 def send_sms():
-    message = client.messages.create(body='Please consult your doctor. Your vital signs have been abnormal recently.', from_="whatsapp:+14155238886", to='whatsapp:+60109828579') 
+    message = client.messages.create(body='Please contant your doctor immediately, your vital signs have been consistently abnormal.', from_="whatsapp:+14155238886", to='whatsapp:+60109828579') 
     return "message sent"
