@@ -14,7 +14,6 @@ for i in range(0, 100):
     if zones[0][0] <= val <= zones[0][1]:
       val += -4 if random.random() < zone_default / 2 / 2 / 2 else 2
 
-    # base case
     elif zones[1][0] <= val <= zones[1][1]:
       val += -3 if random.random() < zone_default / 2 / 2 else 1
 
