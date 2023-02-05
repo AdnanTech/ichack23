@@ -19,22 +19,23 @@ def moving_average(data, n):
   return smoothed_data
 
 
-for i in range(0, 10000):
+for i in range(0, 100):
   if zones[0][0] <= val <= zones[0][1]:
-    val += -3 if random.random() < zone_default / 2 / 2 else 1
+    val += -30 if random.random() < zone_default / 2 / 2 else 10
   elif zones[1][0] <= val <= zones[1][1]:
-    val += -2 if random.random() < zone_default / 2 else 1
+    val += -20 if random.random() < zone_default / 2 else 10
+
+
   elif zones[2][0] <= val <= zones[2][1]:
-    val += -1 if random.random() < zone_default else 1
-  
-  # base case
+    val += -10 if random.random() < zone_default else 10
+
   elif zones[3][0] <= val <= zones[3][1]:
-    val += 1 if random.random() < zone_default / 2 else -1
+    val += 10 if random.random() < zone_default / 2 else -10
   
   elif zones[4][0] <= val <= zones[4][1]:
-    val += 10 if random.random() < zone_default / 2 / 2 else -1
+    val += 10 if random.random() < zone_default / 2 / 2 else -10
   elif zones[5][0] <= val <= zones[5][1]:
-    val += 40 if random.random() < zone_default / 2 / 2 / 2 else -1
+    val += 40 if random.random() < zone_default / 2 / 2 / 2 else -10
   
   data.append(val)
 
@@ -63,18 +64,23 @@ import numpy as np
 # Plot the list of numbers
 # plt.plot(data)
 
+from scipy.ndimage import gaussian_filter1d
+
 y = data
+sigma = 1
+
+x = np.linspace(0, len(y), len(y))
+y_smooth = gaussian_filter1d(y, sigma)
 
 fig, ax = plt.subplots()
-ax.plot(y)
+ax.plot(x, y_smooth, '-')
 
 
-zones = [(10, 40), (41, 50), (51, 90), (91, 110), (111, 130), (131, 160)]
-
-ax.fill_between(range(len(y)), 0, 40, color='red', alpha=0.3)
-ax.fill_between(range(len(y)), 41, 50, color='yellow', alpha=0.3)
-ax.fill_between(range(len(y)), 51, 90, color='grey', alpha=0.3)
-ax.fill_between(range(len(y)), 91, 110, color='yellow', alpha=0.3)
-ax.fill_between(range(len(y)), 111, 130, color='orange', alpha=0.3)
-ax.fill_between(range(len(y)), 131, 160, color='red', alpha=0.3)
+zones = [(0, 40), (41, 50), (51, 90), (91, 110), (111, 130), (131, 150)]
+ax.fill_between(x, 0, 40, color='red', alpha=0.3)
+ax.fill_between(x, 41, 50, color='yellow', alpha=0.3)
+ax.fill_between(x, 51, 90, color='grey', alpha=0.3)
+ax.fill_between(x, 91, 110, color='yellow', alpha=0.3)
+ax.fill_between(x, 111, 130, color='orange', alpha=0.3)
+ax.fill_between(x, 131, 160, color='red', alpha=0.3)
 plt.show()
