@@ -15,6 +15,7 @@ def gen_respiratory(dataname, val):
     zones =  [(33, 35), (35.1, 36), (36.1, 38), (38.1, 39.0), (39.1, 42)]
 
   if dataname == "pulse_ox":
+    #pulse ox scale 1
     if val == 100:
       val -=1
     else:
@@ -33,6 +34,12 @@ def gen_respiratory(dataname, val):
         val += -1 if random.random() < zone_default else 1
 
   elif dataname == "temp":
+    #temperature
+    if val <= 34:
+      val += 2
+    elif val >= 40:
+      val -= 2
+
     if zones[0][0] <= val <= zones[0][1]:
         val += -1 if random.random() < zone_default / 2 / 2 else 2
 
@@ -50,18 +57,27 @@ def gen_respiratory(dataname, val):
       val += 1 if random.random() < zone_default / 2 / 2 else -2
 
   else:
-    # respiratory
+    #bounds
+    if val <= 5:
+      val += 4
+    elif val >= 30:
+      val -= 4
+      
     if zones[0][0] <= val <= zones[0][1]:
-      val += -5 if random.random() < zone_default / 2 / 2 else 2
+      val += -2 if random.random() < zone_default / 2 / 2 else 1
+
     elif zones[1][0] <= val <= zones[1][1]:
-      val += -3 if random.random() < zone_default / 2 else 1
+      val += -2 if random.random() < zone_default / 2 else 1
+
     # base case
     elif zones[2][0] <= val <= zones[2][1]:
       val += -1 if random.random() < zone_default else 1
+
     elif zones[3][0] <= val <= zones[3][1]:
-      val += 3 if random.random() < zone_default / 2 else -1
+      val += 2 if random.random() < zone_default / 2 else -2
+    
     elif zones[4][0] <= val <= zones[4][1]:
-      val += 5 if random.random() < zone_default / 2 / 2 else -2
+      val += 2 if random.random() < zone_default / 2 / 2 else -1
 
   return val
 
