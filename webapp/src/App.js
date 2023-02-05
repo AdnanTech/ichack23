@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-import { Breadcrumb, Layout, Menu, theme } from 'antd';
+import { Breadcrumb, Layout, Menu, theme, Col, Row  } from 'antd';
 import { Line } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
 import React, { useState, useEffect } from "react";
@@ -161,14 +161,36 @@ function App() {
             data: data,
             backgroundColor: "rgba(255, 99, 132, 0.2)",
             borderColor: "rgba(255, 99, 132, 1)",
-            borderWidth: 1,
-            pointRadius: 0,
-            fill: false,
+            pointBackgroundColor: data.map(colorCode),
+            borderWidth: 0,
+            pointRadius: 1,
+            fill: false
           },
         ],
       });
     }
   }, [data, timestamps]);
+
+  function colorCode(value) {
+    if (value <= 40) {
+      return "red"
+    } else if (value > 40 && value < 50) {
+      return "yellow"
+    } else if (value > 50 && value < 90) {
+      return "black"
+    } else if (value > 90 && value < 110) {
+      return "yellow"
+    } else if (value > 110 && value < 130) {
+      return "orange"
+    } else {
+      return "red"
+    }
+  }
+
+  function compressDate(date) {
+    let dateTime = new Date(date)
+    return dateTime.getHours() + ":" + dateTime.getMinutes() + ":" + dateTime.getSeconds()
+  }
 
   const [pulseChartData, setPulseChartData] = useState({
     labels: [],
@@ -188,7 +210,7 @@ function App() {
   useEffect(() => {
     if (timestamps2.length) {
       setPulseChartData({
-        labels: timestamps2,
+        labels: timestamps2.map(compressDate),
         datasets: [
           {
             label: "Pulse Oxygen",
@@ -295,10 +317,14 @@ function App() {
       </Sider>
       <Layout>
           <Header style={{ padding: 0, background: '#F5F5F5', textAlign: 'center', fontWeight: 'bold', fontSize: 25 }}>Patient Data</Header>
-          <Line data={chartData} options={options}/>
-          <Line data={pulseChartData} options={pulseOptions}/>
-          <Line data={respiratoryChartData} options={respiratoryOptions}/>
-          <Line data={tempChartData} options={tempOptions}/>
+          <Row>
+            <Col span={12}><Line data={chartData} options={options}/></Col>
+            <Col span={12}><Line data={pulseChartData} options={pulseOptions}/></Col>
+          </Row>
+          <Row>
+            <Col span={12}><Line data={respiratoryChartData} options={respiratoryOptions}/></Col>
+            <Col span={12}><Line data={tempChartData} options={tempOptions}/></Col>
+          </Row>
       </Layout>
     </Layout>
   );
