@@ -19,6 +19,36 @@ const options = {
   },
 };
 
+const pulseOptions = {
+  responsive: true,
+  scales: {
+    y: {
+      suggestedMin: 95,
+      suggestedMax: 100,
+    },
+  },
+};
+
+const respiratoryOptions = {
+  responsive: true,
+  scales: {
+    y: {
+      suggestedMin: 0,
+      suggestedMax: 40,
+    },
+  },
+};
+
+const tempOptions = {
+  responsive: true,
+  scales: {
+    y: {
+      suggestedMin: 33,
+      suggestedMax: 42,
+    },
+  },
+};
+
 const plugins = [{
   beforeDraw: function(chart) {
     const ctx = chart.ctx;
@@ -26,14 +56,14 @@ const plugins = [{
     const chartArea = chart.chartArea;
 
     // Chart background
-    var gradientBack = canvas.getContext("2d").createLinearGradient(0, 250, 0, 0);
-    gradientBack.addColorStop(0, "rgba(251,221,221,1)");
-    gradientBack.addColorStop(0.14288, "rgba(213,235,248,1");
-    gradientBack.addColorStop(0.21429, "rgba(226,245,234,1)");
-    gradientBack.addColorStop(0.5, "rgba(226,245,234,1)");
-    gradientBack.addColorStop(0.64286, "rgba(252,244,219,1)");
-    gradientBack.addColorStop(0.785714, "rgba(213,235,248,1)");
-    gradientBack.addColorStop(1, "rgba(251,221,221,1)");
+    var gradientBack = canvas.getContext("2d").createLinearGradient(0, 20, 0, 200);
+    gradientBack.addColorStop(0, "red");
+    gradientBack.addColorStop(0.14288, "blue");
+    gradientBack.addColorStop(0.21429, "green");
+    gradientBack.addColorStop(0.5, "yellow");
+    gradientBack.addColorStop(0.64286, "red");
+    gradientBack.addColorStop(0.785714, "yellow");
+    gradientBack.addColorStop(1, "red");
 
     ctx.fillStyle = gradientBack;
     ctx.fillRect(chartArea.left, chartArea.bottom,
@@ -44,6 +74,10 @@ const plugins = [{
 function App() {
   const [data, setData] = useState([]);
   const [timestamps, setTimestamps] = useState([]);
+  const [timestamps2, setTimestamps2] = useState([]);
+  const [pulseData, setPulseData] = useState([]);
+  const [respiratory, setRespiratory] = useState([]);
+  const [temp, setTemp] = useState([]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -56,35 +90,51 @@ function App() {
         .then((response) => response.json())
         .then((timestamps) => setTimestamps(timestamps))
         .catch((err) => console.log(err));
-    }, 10000);
+    }, 1000);
 
     return () => clearInterval(intervalId);
   }, []);
-
+  
   useEffect(() => {
-    let thirtyMinsTimestamps = [];
-    let thirtyMinsData = [];
-    let currTimeMark = (timestamps.length > 0 && (new Date(timestamps[0])).getMinutes() < 30) ? "0" : "1";
-    let thirtyMinsIntervalData = [];
-    for (let i = 0; i < Math.min(data.length, timestamps.length); i++) {
-      let timestamp = new Date(timestamps[i])
-      if ((timestamp.getMinutes() >= 30 && currTimeMark === "0") || (timestamp.getMinutes() < 30 && currTimeMark === "1")) {
-        console.log("<1>")
-        currTimeMark = (currTimeMark === "1") ? "0" : "1";
-        if (currTimeMark === "0") {
-          thirtyMinsTimestamps.push(timestamp.getHours() + ":00")
-          currTimeMark = 1;
-        } else {
-          thirtyMinsTimestamps.push(timestamp.getHours() + ":30")
-          currTimeMark = 0;
-        }
-        thirtyMinsData.push(thirtyMinsIntervalData.reduce((a, b) => a + b, 0) / thirtyMinsIntervalData.length);
-      }
-      console.log("<2>")
-      thirtyMinsIntervalData.push(data[i]);
-      console.log(thirtyMinsTimestamps, thirtyMinsData)
-    }
-  }, [timestamps, data])
+    const intervalId = setInterval(() => {
+      fetch("http://127.0.0.1:5000/api/per_min")
+        .then((response) => response.json())
+        .then((data) => {
+          setTimestamps2(timestamps2 => [...timestamps2, data.timestamp])
+          setPulseData(pulseData => [...pulseData, data.pulse_ox])
+          setRespiratory(respiratory => [...respiratory, data.respiratory])
+          setTemp(temp => [...temp, data.temp])
+        })
+        .catch((err) => console.log(err));
+    }, 1000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+
+  // useEffect(() => {
+  //   let thirtyMinsTimestamps = [];
+  //   let thirtyMinsData = [];
+  //   let currTimeMark = (timestamps.length > 0 && (new Date(timestamps[0])).getMinutes() < 30) ? "0" : "1";
+  //   let thirtyMinsIntervalData = [];
+  //   for (let i = 0; i < Math.min(data.length, timestamps.length); i++) {
+  //     let timestamp = new Date(timestamps[i])
+  //     if ((timestamp.getMinutes() >= 30 && currTimeMark === "0") || (timestamp.getMinutes() < 30 && currTimeMark === "1")) {
+  //       console.log("<1>")
+  //       currTimeMark = (currTimeMark === "1") ? "0" : "1";
+  //       if (currTimeMark === "0") {
+  //         thirtyMinsTimestamps.push(timestamp.getHours() + ":00")
+  //         currTimeMark = 1;
+  //       } else {
+  //         thirtyMinsTimestamps.push(timestamp.getHours() + ":30")
+  //         currTimeMark = 0;
+  //       }
+  //       thirtyMinsData.push(thirtyMinsIntervalData.reduce((a, b) => a + b, 0) / thirtyMinsIntervalData.length);
+  //     }
+  //     console.log("<2>")
+  //     thirtyMinsIntervalData.push(data[i]);
+  //     console.log(thirtyMinsTimestamps, thirtyMinsData)
+  //   }
+  // }, [timestamps, data])
 
   const [chartData, setChartData] = useState({
     labels: [],
@@ -120,6 +170,110 @@ function App() {
     }
   }, [data, timestamps]);
 
+  const [pulseChartData, setPulseChartData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: "Pulse Oxygen",
+        data: [],
+        backgroundColor: "rgba(255, 99, 132, 0.2)",
+        borderColor: "rgba(255, 99, 132, 1)",
+        borderWidth: 1,
+        pointRadius: 0,
+        fill: false,
+      },
+    ],
+  });
+
+  useEffect(() => {
+    if (timestamps2.length) {
+      setPulseChartData({
+        labels: timestamps2,
+        datasets: [
+          {
+            label: "Pulse Oxygen",
+            data: pulseData,
+            backgroundColor: "rgba(255, 99, 132, 0.2)",
+            borderColor: "rgba(255, 99, 132, 1)",
+            borderWidth: 1,
+            pointRadius: 0,
+            fill: false,
+          },
+        ],
+      });
+    }
+  }, [timestamps2, pulseData]);
+
+  const [respiratoryChartData, setRespiratoryChartData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: "Respiratory Rate",
+        data: [],
+        backgroundColor: "rgba(255, 99, 132, 0.2)",
+        borderColor: "rgba(255, 99, 132, 1)",
+        borderWidth: 1,
+        pointRadius: 0,
+        fill: false,
+      },
+    ],
+  });
+
+  useEffect(() => {
+    if (timestamps2.length) {
+      setRespiratoryChartData({
+        labels: timestamps2,
+        datasets: [
+          {
+            label: "Respiratory Rate",
+            data: respiratory,
+            backgroundColor: "rgba(255, 99, 132, 0.2)",
+            borderColor: "rgba(255, 99, 132, 1)",
+            borderWidth: 1,
+            pointRadius: 0,
+            fill: false,
+          },
+        ],
+      });
+    }
+  }, [timestamps2, respiratory]);
+
+
+  const [tempChartData, setTempChartData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: "Temperature",
+        data: [],
+        backgroundColor: "rgba(255, 99, 132, 0.2)",
+        borderColor: "rgba(255, 99, 132, 1)",
+        borderWidth: 1,
+        pointRadius: 0,
+        fill: false,
+      },
+    ],
+  });
+
+  useEffect(() => {
+    if (timestamps2.length) {
+      setTempChartData({
+        labels: timestamps2,
+        datasets: [
+          {
+            label: "Temperature",
+            data: temp,
+            backgroundColor: "rgba(255, 99, 132, 0.2)",
+            borderColor: "rgba(255, 99, 132, 1)",
+            borderWidth: 1,
+            pointRadius: 0,
+            fill: false,
+          },
+        ],
+      });
+    }
+  }, [timestamps2, temp]);
+
+
   
   return (
     <Layout style={{ minHeight: '100vh', maxHeight: '100vh' }}>
@@ -141,7 +295,10 @@ function App() {
       </Sider>
       <Layout>
           <Header style={{ padding: 0, background: '#F5F5F5', textAlign: 'center', fontWeight: 'bold', fontSize: 25 }}>Patient Data</Header>
-          <Line data={chartData} options={options} plugins={plugins} />
+          <Line data={chartData} options={options}/>
+          <Line data={pulseChartData} options={pulseOptions}/>
+          <Line data={respiratoryChartData} options={respiratoryOptions}/>
+          <Line data={tempChartData} options={tempOptions}/>
       </Layout>
     </Layout>
   );
