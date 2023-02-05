@@ -154,7 +154,7 @@ function App() {
   useEffect(() => {
     if (data.length && timestamps.length) {
       setChartData({
-        labels: timestamps,
+        labels: timestamps.map(compressDate),
         datasets: [
           {
             label: "Heart rate",
@@ -189,14 +189,23 @@ function App() {
 
   function compressDate(date) {
     let dateTime = new Date(date)
-    return dateTime.getHours() + ":" + dateTime.getMinutes() + ":" + dateTime.getSeconds()
+    return padNum(dateTime.getHours()) + ":" + padNum(dateTime.getMinutes()) + ":" + padNum(dateTime.getSeconds())
+  }
+
+  function padNum(num) {
+    let lenStr = String(num)
+    if (lenStr.length == 2) {
+      return lenStr
+    } else {
+      return '0' + lenStr 
+    }
   }
 
   const [pulseChartData, setPulseChartData] = useState({
     labels: [],
     datasets: [
       {
-        label: "Pulse Oxygen",
+        label: "Oxygen Saturation",
         data: [],
         backgroundColor: "rgba(255, 99, 132, 0.2)",
         borderColor: "rgba(255, 99, 132, 1)",
@@ -210,10 +219,10 @@ function App() {
   useEffect(() => {
     if (timestamps2.length) {
       setPulseChartData({
-        labels: timestamps2.map(compressDate),
+        labels: timestamps2,
         datasets: [
           {
-            label: "Pulse Oxygen",
+            label: "Oxygen Saturation",
             data: pulseData,
             backgroundColor: "rgba(255, 99, 132, 0.2)",
             borderColor: "rgba(255, 99, 132, 1)",
