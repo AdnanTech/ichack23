@@ -11,6 +11,11 @@ Chart.register(...registerables);
 
 const options = {
   responsive: true,
+  plugins: {
+    legend: {
+      display: false
+    }
+  },
   scales: {
     y: {
       suggestedMin: 30,
@@ -21,9 +26,14 @@ const options = {
 
 const pulseOptions = {
   responsive: true,
+  plugins: {
+    legend: {
+      display: false
+    }
+  },
   scales: {
     y: {
-      suggestedMin: 95,
+      suggestedMin: 40,
       suggestedMax: 100,
     },
   },
@@ -31,6 +41,11 @@ const pulseOptions = {
 
 const respiratoryOptions = {
   responsive: true,
+  plugins: {
+    legend: {
+      display: false
+    }
+  },
   scales: {
     y: {
       suggestedMin: 0,
@@ -41,6 +56,11 @@ const respiratoryOptions = {
 
 const tempOptions = {
   responsive: true,
+  plugins: {
+    legend: {
+      display: false
+    }
+  },
   scales: {
     y: {
       suggestedMin: 33,
@@ -49,27 +69,6 @@ const tempOptions = {
   },
 };
 
-const plugins = [{
-  beforeDraw: function(chart) {
-    const ctx = chart.ctx;
-    const canvas = chart.canvas;
-    const chartArea = chart.chartArea;
-
-    // Chart background
-    var gradientBack = canvas.getContext("2d").createLinearGradient(0, 20, 0, 200);
-    gradientBack.addColorStop(0, "red");
-    gradientBack.addColorStop(0.14288, "blue");
-    gradientBack.addColorStop(0.21429, "green");
-    gradientBack.addColorStop(0.5, "yellow");
-    gradientBack.addColorStop(0.64286, "red");
-    gradientBack.addColorStop(0.785714, "yellow");
-    gradientBack.addColorStop(1, "red");
-
-    ctx.fillStyle = gradientBack;
-    ctx.fillRect(chartArea.left, chartArea.bottom,
-      chartArea.right - chartArea.left, chartArea.top - chartArea.bottom);
-  }
-}];
 
 function App() {
   const [data, setData] = useState([]);
@@ -106,41 +105,15 @@ function App() {
           setTemp(temp => [...temp, data.temp])
         })
         .catch((err) => console.log(err));
-    }, 1000);
+    }, 250);
     return () => clearInterval(intervalId);
   }, []);
 
-
-  // useEffect(() => {
-  //   let thirtyMinsTimestamps = [];
-  //   let thirtyMinsData = [];
-  //   let currTimeMark = (timestamps.length > 0 && (new Date(timestamps[0])).getMinutes() < 30) ? "0" : "1";
-  //   let thirtyMinsIntervalData = [];
-  //   for (let i = 0; i < Math.min(data.length, timestamps.length); i++) {
-  //     let timestamp = new Date(timestamps[i])
-  //     if ((timestamp.getMinutes() >= 30 && currTimeMark === "0") || (timestamp.getMinutes() < 30 && currTimeMark === "1")) {
-  //       console.log("<1>")
-  //       currTimeMark = (currTimeMark === "1") ? "0" : "1";
-  //       if (currTimeMark === "0") {
-  //         thirtyMinsTimestamps.push(timestamp.getHours() + ":00")
-  //         currTimeMark = 1;
-  //       } else {
-  //         thirtyMinsTimestamps.push(timestamp.getHours() + ":30")
-  //         currTimeMark = 0;
-  //       }
-  //       thirtyMinsData.push(thirtyMinsIntervalData.reduce((a, b) => a + b, 0) / thirtyMinsIntervalData.length);
-  //     }
-  //     console.log("<2>")
-  //     thirtyMinsIntervalData.push(data[i]);
-  //     console.log(thirtyMinsTimestamps, thirtyMinsData)
-  //   }
-  // }, [timestamps, data])
 
   const [chartData, setChartData] = useState({
     labels: [],
     datasets: [
       {
-        label: "Heart rate",
         data: [],
         backgroundColor: "rgba(255, 99, 132, 0.2)",
         borderColor: "rgba(255, 99, 132, 1)",
@@ -157,11 +130,10 @@ function App() {
         labels: timestamps.map(compressDate),
         datasets: [
           {
-            label: "Heart rate",
             data: data,
             backgroundColor: "rgba(255, 99, 132, 0.2)",
             borderColor: "rgba(255, 99, 132, 1)",
-            pointBackgroundColor: data.map(colorCode),
+            pointBackgroundColor: data.map(colorCodePulse),
             borderWidth: 0,
             pointRadius: 1,
             fill: false
@@ -171,19 +143,59 @@ function App() {
     }
   }, [data, timestamps]);
 
-  function colorCode(value) {
+  function colorCodePulse(value) {
     if (value <= 40) {
-      return "red"
-    } else if (value > 40 && value < 50) {
-      return "yellow"
-    } else if (value > 50 && value < 90) {
-      return "black"
-    } else if (value > 90 && value < 110) {
-      return "yellow"
-    } else if (value > 110 && value < 130) {
+      return "#DA2C43"
+    } else if (value > 40 && value <= 50) {
+      return "#FFC107"
+    } else if (value > 50 && value <= 90) {
+      return "green"
+    } else if (value > 90 && value <= 110) {
+      return "#FFC107"
+    } else if (value > 110 && value <= 130) {
       return "orange"
     } else {
-      return "red"
+      return "#DA2C43"
+    }
+  }
+
+  function colorCodeRespiratory(value) {
+    if (value <= 8) {
+      return "#DA2C43"
+    } else if (value > 8 && value <= 11) {
+      return "#FFC107"
+    } else if (value > 11 && value <= 20) {
+      return "green"
+    } else if (value > 20 && value <= 24) {
+      return "#FFC107"
+    } else {
+      return "#DA2C43"
+    }
+  }
+
+  function colorCodeTemp(value) {
+    if (value <= 35) {
+      return "#DA2C43"
+    } else if (value > 35 && value <= 36) {
+      return "#FFC107"
+    } else if (value > 36 && value <= 38) {
+      return "green"
+    } else if (value > 38 && value <= 39) {
+      return "#FFC107"
+    } else {
+      return "#DA2C43"
+    }
+  }
+
+  function colorCodeOxygen(value) {
+    if (value <= 91) {
+      return "#DA2C43"
+    } else if (value > 91 && value <= 93) {
+      return "orange"
+    } else if (value > 93 && value <= 95) {
+      return "#FFC107"
+    } else {
+      return "green"
     }
   }
 
@@ -226,8 +238,9 @@ function App() {
             data: pulseData,
             backgroundColor: "rgba(255, 99, 132, 0.2)",
             borderColor: "rgba(255, 99, 132, 1)",
-            borderWidth: 1,
-            pointRadius: 0,
+            pointBackgroundColor: pulseData.map(colorCodeOxygen),
+            borderWidth: 0,
+            pointRadius: 2,
             fill: false,
           },
         ],
@@ -260,8 +273,9 @@ function App() {
             data: respiratory,
             backgroundColor: "rgba(255, 99, 132, 0.2)",
             borderColor: "rgba(255, 99, 132, 1)",
-            borderWidth: 1,
-            pointRadius: 0,
+            pointBackgroundColor: respiratory.map(colorCodeRespiratory),
+            borderWidth: 0,
+            pointRadius: 2,
             fill: false,
           },
         ],
@@ -295,8 +309,9 @@ function App() {
             data: temp,
             backgroundColor: "rgba(255, 99, 132, 0.2)",
             borderColor: "rgba(255, 99, 132, 1)",
-            borderWidth: 1,
-            pointRadius: 0,
+            pointBackgroundColor: temp.map(colorCodeTemp),
+            borderWidth: 0,
+            pointRadius: 2,
             fill: false,
           },
         ],
@@ -327,12 +342,20 @@ function App() {
       <Layout>
           <Header style={{ padding: 0, background: '#F5F5F5', textAlign: 'center', fontWeight: 'bold', fontSize: 25 }}>Patient Data</Header>
           <Row>
-            <Col span={12}><Line data={chartData} options={options}/></Col>
-            <Col span={12}><Line data={pulseChartData} options={pulseOptions}/></Col>
+            <Col span={12}>
+              <><h2 style={{margin: 20}}>Heart Rate</h2><Line data={chartData} options={options}/></>
+            </Col>
+            <Col span={12}>
+              <><h2 style={{margin: 20}}>Oxygen Saturation</h2><Line data={pulseChartData} options={pulseOptions}/></>
+            </Col>
           </Row>
           <Row>
-            <Col span={12}><Line data={respiratoryChartData} options={respiratoryOptions}/></Col>
-            <Col span={12}><Line data={tempChartData} options={tempOptions}/></Col>
+            <Col span={12}>
+              <><h2 style={{margin: 20}}>Respiratory Rate</h2><Line data={respiratoryChartData} options={respiratoryOptions}/></>
+            </Col>
+            <Col span={12}>
+              <><h2 style={{margin: 20}}>Temperature</h2><Line data={tempChartData} options={tempOptions}/></>
+            </Col>
           </Row>
       </Layout>
     </Layout>
