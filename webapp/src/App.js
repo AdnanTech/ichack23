@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-import { Breadcrumb, Layout, Menu, theme, Col, Row  } from 'antd';
+import { Breadcrumb, Layout, Menu, theme, Col, Row, Table, Tag  } from 'antd';
 import { Line } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
 import React, { useState, useEffect } from "react";
@@ -83,6 +83,70 @@ function App() {
   const [respiratoryScore, setRespiratoryScore] = useState(0)
   const [tempScore, setTempScore] = useState(0)
 
+  const [warningData, setWarningData] = useState([])
+
+  const columns = [
+    {
+      title: 'Tags',
+      dataIndex: 'tags',
+      key: 'tags',
+      render: (_, { tags }) => (
+        <>
+          {tags.map((tag) => {
+            return (
+              <Tag color={"red"} key={"red"}>
+                {tag}
+              </Tag>
+            );
+          })}
+        </>
+      ),
+    },
+    {
+      title: 'Datetime',
+      dataIndex: 'datetime',
+      key: 'datetime',
+    },
+    {
+      title: 'Heart Rate',
+      dataIndex: 'heartRate',
+      key: 'heartRate',
+    },
+    {
+      title: 'Oxygen Saturation',
+      dataIndex: 'oxy',
+      key: 'oxy',
+    },
+    {
+      title: 'Temperature',
+      dataIndex: 'temp',
+      key: 'temp',
+    },
+    {
+      title: 'Respiratory Rate',
+      dataIndex: 'respiratory',
+      key: 'respiratory',
+    },
+    {
+      title: 'NEWS',
+      dataIndex: 'news',
+      key: 'news',
+    },
+  ]
+
+  const data2 = [
+    {
+      key: '1',
+      tags: ['Warning'],
+      datetime: (new Date()).toString(),
+      heartRate: 80,
+      oxy: 50,
+      temp: 20,
+      respiratory: 70,
+      news: 10,
+    },
+  ];
+
   useEffect(() => {
     const intervalId = setInterval(() => {
       fetch("http://localhost:3000/api/hr")
@@ -145,11 +209,11 @@ function App() {
 
           if (data.temp <= 35) {
             setTempScore(3)
-          } else if (data.respiratory > 35 && data.respiratory <= 36) {
+          } else if (data.temp > 35 && data.temp <= 36) {
             setTempScore(1)
-          } else if (data.respiratory > 36 && data.respiratory <= 38) {
+          } else if (data.temp > 36 && data.temp <= 38) {
             setTempScore(0)
-          } else if (data.respiratory > 38 && data.respiratory <= 39) {
+          } else if (data.temp > 38 && data.temp <= 39) {
             setTempScore(1)
           } else {
             setTempScore(2)
@@ -282,6 +346,23 @@ function App() {
   });
 
   useEffect(() => {
+    if (hrScore + oxyScore + tempScore + respiratoryScore > 5) {
+      setWarningData(warningData => [...warningData, {
+          key: (new Date()).toString(),
+          tags: ['Warning'],
+          datetime: (new Date()).toString(),
+          heartRate: data.at(-1),
+          oxy: pulseData.at(-1),
+          temp: temp.at(-1),
+          respiratory: respiratory.at(-1),
+          news: hrScore + oxyScore + tempScore + respiratoryScore,
+        },
+      ])
+    }
+
+  }, [hrScore, oxyScore, tempScore, respiratoryScore])
+
+  useEffect(() => {
     if (timestamps2.length) {
       setPulseChartData({
         labels: timestamps2,
@@ -376,7 +457,14 @@ function App() {
   
   return (
     <Layout style={{ minHeight: '100vh', maxHeight: '100vh' }}>
-      <Sider>
+      <Sider style={{
+          overflow: 'auto',
+          height: '100vh',
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          bottom: 0,
+        }}>
         <div style={{ height: 60, margin: 25}}>
             <h1 style={{color: "white", width: "100%", fontSize: 18}}>RecoveryChecker</h1>
         </div>
@@ -392,7 +480,7 @@ function App() {
           </Menu.Item>
         </Menu>
       </Sider>
-      <Layout>
+      <Layout style={{ marginLeft: 250 }}>
           <Header style={{ padding: 0, background: '#F5F5F5', textAlign: 'center', fontWeight: 'bold', fontSize: 25 }}>Patient Data</Header>
           <Row>
             <Col span={12}>
@@ -434,6 +522,11 @@ function App() {
               </>
             </Col>
           </Row>
+
+          <Header style={{ padding: 0, background: '#F5F5F5', textAlign: 'center', fontWeight: 'bold', fontSize: 20, paddingVertical:20, opacity: 0 }}>Warnings</Header>
+
+          <div></div>
+          <Table columns={columns} dataSource={warningData} />
       </Layout>
     </Layout>
   );
