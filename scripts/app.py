@@ -2,19 +2,20 @@ import os
 import random
 from flask import Flask, request
 from datetime import datetime, timedelta
+from respiratory_rate import gen_respiratory
 
 app = Flask(__name__)
 
 class Data:
     def __init__(self):
-        self.prev_respiratory = 10
-        self.prev_puluse_ox = 80
-        self.prev_temp = 25
+        self.prev_respiratory = 16
+        self.prev_pulse_ox = 98
+        self.prev_temp = 37
         self.prev_time = datetime.now()
 
-    def setter(self, prev_respiratory, prev_puluse_ox, prev_temp):
+    def setter(self, prev_respiratory, prev_pulse_ox, prev_temp):
         self.prev_respiratory = prev_respiratory
-        self.prev_puluse_ox = prev_puluse_ox
+        self.prev_pulse_ox = prev_pulse_ox
         self.prev_temp = prev_temp
         self.time_increment()
 
@@ -28,14 +29,15 @@ data = Data()
 @app.route("/api/per_min", methods=['GET'])
 def get_per_min():
     timestamp = data.prev_time.strftime('%Y-%m-%d %H:%M:%S')
-    respiratory = random.randint(4,30)
-    puluse_ox = random.randint(75,120)
-    temp = random.randint(10,50)
-    data.setter(respiratory, puluse_ox, temp)
+    respiratory = gen_respiratory("respiratory", data.prev_respiratory)
+    pulse_ox = gen_respiratory("pulse_ox", data.prev_pulse_ox)
+    temp = gen_respiratory("temp", data.prev_temp)
+    data.setter(respiratory, pulse_ox, temp)
+    print(pulse_ox, temp)
     return {
         'timestamp': timestamp,
         'respiratory':  respiratory,
-        'puluse_ox' : puluse_ox,
+        'pulse_ox' : pulse_ox,
         'temp' : temp
         }
 
