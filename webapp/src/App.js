@@ -78,11 +78,28 @@ function App() {
   const [respiratory, setRespiratory] = useState([]);
   const [temp, setTemp] = useState([]);
 
+  const [hrScore, setHrScore] = useState(0)
+  const [oxyScore, setOxyScore] = useState(0)
+  const [respiratoryScore, setRespiratoryScore] = useState(0)
+  const [tempScore, setTempScore] = useState(0)
+
   useEffect(() => {
     const intervalId = setInterval(() => {
       fetch("http://localhost:3000/api/hr")
         .then((response) => response.json())
-        .then((data) => setData(data))
+        .then((data) => {
+          setData(data)
+          let lastData = data.at(-1)
+          if (lastData <= 40 || lastData > 130) {
+            setHrScore(3)
+          } else if ((lastData > 40 && lastData <= 50) || (lastData > 90 && lastData <= 110)) {
+            setHrScore(1)
+          } else if (lastData > 50 && lastData <= 90) {
+            setHrScore(0)
+          } else if (lastData > 110 && lastData <= 130) {
+            setHrScore(2)
+          }
+        })
         .catch((err) => console.log(err));
 
       fetch("http://localhost:3000/api/timestamps")
@@ -103,6 +120,42 @@ function App() {
           setPulseData(pulseData => [...pulseData, data.pulse_ox])
           setRespiratory(respiratory => [...respiratory, data.respiratory])
           setTemp(temp => [...temp, data.temp])
+
+          if (data.pulse_ox <= 91) {
+            setOxyScore(3)
+          } else if (data.pulse_ox > 91 && data.pulse_ox <= 93) {
+            setOxyScore(2)
+          } else if (data.pulse_ox > 91 && data.pulse_ox <= 93) {
+            setOxyScore(1)
+          } else {
+            setOxyScore(0)
+          }
+
+          if (data.respiratory <= 8) {
+            setRespiratoryScore(3)
+          } else if (data.respiratory > 8 && data.respiratory <= 11) {
+            setRespiratoryScore(1)
+          } else if (data.respiratory > 11 && data.respiratory <= 20) {
+            setRespiratoryScore(0)
+          } else if (data.respiratory > 20 && data.respiratory <= 24) {
+            setRespiratoryScore(2)
+          } else {
+            setRespiratoryScore(3)
+          }
+
+          if (data.temp <= 35) {
+            setTempScore(3)
+          } else if (data.respiratory > 35 && data.respiratory <= 36) {
+            setTempScore(1)
+          } else if (data.respiratory > 36 && data.respiratory <= 38) {
+            setTempScore(0)
+          } else if (data.respiratory > 38 && data.respiratory <= 39) {
+            setTempScore(1)
+          } else {
+            setTempScore(2)
+          }
+
+
         })
         .catch((err) => console.log(err));
     }, 250);
@@ -343,18 +396,42 @@ function App() {
           <Header style={{ padding: 0, background: '#F5F5F5', textAlign: 'center', fontWeight: 'bold', fontSize: 25 }}>Patient Data</Header>
           <Row>
             <Col span={12}>
-              <><h2 style={{margin: 20}}>Heart Rate</h2><Line data={chartData} options={options}/></>
+              <>
+                <Row>
+                  <Col><h2 style={{margin: 20}}>Heart Rate</h2></Col>
+                  <Col><h2 style={{margin: 20, textAlign: "right"}}>{hrScore}</h2></Col>
+                </Row>
+                <Line data={chartData} options={options}/>
+              </>
             </Col>
             <Col span={12}>
-              <><h2 style={{margin: 20}}>Oxygen Saturation</h2><Line data={pulseChartData} options={pulseOptions}/></>
+              <>
+                <Row>
+                  <Col><h2 style={{margin: 20}}>Oxygen Saturation</h2></Col>
+                  <Col><h2 style={{margin: 20, textAlign: "right"}}>{oxyScore}</h2></Col>
+                </Row>
+                <Line data={pulseChartData} options={pulseOptions}/>
+              </>
             </Col>
           </Row>
           <Row>
             <Col span={12}>
-              <><h2 style={{margin: 20}}>Respiratory Rate</h2><Line data={respiratoryChartData} options={respiratoryOptions}/></>
+              <>
+                <Row>
+                  <Col><h2 style={{margin: 20}}>Respiratory Rate</h2></Col>
+                  <Col><h2 style={{margin: 20, textAlign: "right"}}>{respiratoryScore}</h2></Col>
+                </Row>
+                <Line data={respiratoryChartData} options={respiratoryOptions}/>
+              </>
             </Col>
             <Col span={12}>
-              <><h2 style={{margin: 20}}>Temperature</h2><Line data={tempChartData} options={tempOptions}/></>
+              <>
+                <Row>
+                  <Col><h2 style={{margin: 20}}>Temperature</h2></Col>
+                  <Col><h2 style={{margin: 20, textAlign: "right"}}>{tempScore}</h2></Col>
+                </Row>
+                <Line data={tempChartData} options={tempOptions}/>
+              </>
             </Col>
           </Row>
       </Layout>
