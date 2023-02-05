@@ -28,7 +28,7 @@ data = Data()
 
 @app.route("/api/per_min", methods=['GET'])
 def get_per_min():
-    timestamp = data.prev_time.strftime('%Y-%m-%d %H:%M:%S')
+    timestamp = data.prev_time.strftime('%H:%M:%S')
     respiratory = gen_respiratory("respiratory", data.prev_respiratory)
     pulse_ox = gen_respiratory("pulse_ox", data.prev_pulse_ox)
     temp = gen_respiratory("temp", data.prev_temp)
