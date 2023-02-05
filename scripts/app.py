@@ -3,6 +3,10 @@ import random
 from flask import Flask, request
 from datetime import datetime, timedelta
 from respiratory_rate import gen_respiratory
+from twilio.rest import Client 
+ 
+account_sid = 'ACd0bd1b2e9b5eeb93ff954d95647a757d' 
+client = Client(account_sid, auth_token) 
 
 app = Flask(__name__)
 
@@ -47,3 +51,8 @@ def get_per_day():
     return {
         'steps' : steps
         }
+
+@app.route("/api/send_sms", methods=['GET'])
+def send_sms():
+    message = client.messages.create(body='Please consult your doctor. Your vital signs have been abnormal recently.', from_="whatsapp:+14155238886", to='whatsapp:+60109828579') 
+    return "message sent"

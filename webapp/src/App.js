@@ -218,8 +218,6 @@ function App() {
           } else {
             setTempScore(2)
           }
-
-
         })
         .catch((err) => console.log(err));
     }, 250);
@@ -346,7 +344,7 @@ function App() {
   });
 
   useEffect(() => {
-    if (hrScore + oxyScore + tempScore + respiratoryScore > 5) {
+    if (hrScore + oxyScore + tempScore + respiratoryScore > 2) {
       setWarningData(warningData => [...warningData, {
           key: (new Date()).toString(),
           tags: ['Warning'],
@@ -358,6 +356,8 @@ function App() {
           news: hrScore + oxyScore + tempScore + respiratoryScore,
         },
       ])
+
+      fetch("http://127.0.0.1:5000/api/send_sms")
     }
 
   }, [hrScore, oxyScore, tempScore, respiratoryScore])
